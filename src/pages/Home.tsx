@@ -2,13 +2,19 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ServiceCard from "@/components/ServiceCard";
 import TestimonialCard from "@/components/TestimonialCard";
+import AmazonProductCard from "@/components/AmazonProductCard";
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { products as staticProducts, getAffiliateLink } from "@/data/products";
+import { useProducts as useProductsFirestore } from "@/hooks/useProducts";
+import walennaImage from "@/assets/walenna.jpg";
 import heroImage from "@/assets/hero-banner.jpg";
 import lashesImage from "@/assets/service-lashes.jpg";
 import browsImage from "@/assets/service-brows.jpg";
 import progressiveImage from "@/assets/service-progressive.jpg";
 
 const Home = () => {
+  const { products: firestoreProducts } = useProductsFirestore();
+
   const services = [
     {
       title: "Alongamento de Cílios",
@@ -54,6 +60,17 @@ const Home = () => {
     "Agendamento online facilitado",
   ];
 
+  // Usa produtos reais do Firestore se disponíveis
+  const homeProducts = firestoreProducts.length > 0 ? firestoreProducts : staticProducts;
+
+  // Produtos em destaque para a home (prioriza produtos com badge, depois preenche até 4)
+  const featuredProductsWithBadge = homeProducts.filter((p) => p.badge).slice(0, 4);
+  const remainingSlots = 4 - featuredProductsWithBadge.length;
+  const featuredProducts = [
+    ...featuredProductsWithBadge,
+    ...homeProducts.filter((p) => !p.badge).slice(0, remainingSlots),
+  ].slice(0, 4);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -87,14 +104,21 @@ const Home = () => {
       {/* Welcome Section */}
       <section className="py-20 bg-secondary">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <Sparkles className="h-12 w-12 text-primary mx-auto mb-6" />
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6">Bem-vinda ao Beleza Refinada</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Sou especialista em realçar a beleza natural de cada mulher através de procedimentos estéticos de alta qualidade. 
-              Com anos de experiência e dedicação, ofereço serviços personalizados de extensão de cílios, design de sobrancelhas 
-              e progressiva capilar, sempre buscando resultados impecáveis que valorizam sua autoestima e confiança.
-            </p>
+          <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
+            <div className="relative">
+              <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden shadow-xl ring-2 ring-primary/10 bg-white">
+                <img src={walennaImage} alt="Walenna Mello, especialista do Beleza Refinada" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            <div className="text-center md:text-left">
+              <Sparkles className="h-12 w-12 text-primary mb-6 mx-auto md:mx-0" />
+              <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6">Bem-vinda ao Beleza Refinada</h2>
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Sou Walenna Mello, especialista em realçar a beleza natural de cada mulher através de procedimentos estéticos de alta qualidade.
+                Com anos de experiência e dedicação, ofereço serviços personalizados de extensão de cílios, design de sobrancelhas
+                e progressiva capilar, sempre buscando resultados impecáveis que valorizam sua autoestima e confiança.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -142,6 +166,40 @@ const Home = () => {
             {testimonials.map((testimonial) => (
               <TestimonialCard key={testimonial.name} {...testimonial} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Recommended Products Section */}
+      <section className="py-20 bg-muted">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4">
+              Produtos Recomendados
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              Selecionamos alguns itens do nosso catálogo de <Link to="/produtos" className="text-primary underline underline-offset-4">Produtos Recomendados</Link> para você manter os cuidados em casa com a mesma qualidade do estúdio.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-8">
+            {featuredProducts.map((product) => (
+              <AmazonProductCard
+                key={product.id}
+                title={product.title}
+                description={product.description}
+                image={product.image}
+                price={product.price}
+                rating={product.rating}
+                affiliateLink={getAffiliateLink(product.asin)}
+                badge={product.badge}
+                videoUrl={product.videoUrl}
+              />
+            ))}
+          </div>
+          <div className="text-center">
+            <Button variant="outline" size="lg" className="text-lg px-10 py-6" asChild>
+              <Link to="/produtos">Ver Todos os Produtos</Link>
+            </Button>
           </div>
         </div>
       </section>

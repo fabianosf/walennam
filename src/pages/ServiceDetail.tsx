@@ -1,12 +1,29 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Clock, CheckCircle2 } from "lucide-react";
+import AmazonProductCard from "@/components/AmazonProductCard";
+import { products, getAffiliateLink } from "@/data/products";
 import lashesImage from "@/assets/service-lashes.jpg";
 import browsImage from "@/assets/service-brows.jpg";
 import progressiveImage from "@/assets/service-progressive.jpg";
 
 const ServiceDetail = () => {
   const { serviceId } = useParams();
+
+  // Mapeamento de IDs de serviços para categorias de produtos
+  const serviceToProductCategory: Record<string, string> = {
+    cilios: "beleza",
+    sobrancelhas: "beleza",
+    progressiva: "beleza",
+  };
+
+  // Função para obter produtos recomendados baseado no serviço
+  const getRecommendedProducts = (serviceId: string | undefined) => {
+    if (!serviceId) return [];
+    const category = serviceToProductCategory[serviceId];
+    if (!category) return [];
+    return products.filter((product) => product.category === category);
+  };
 
   const servicesData: Record<string, any> = {
     cilios: {
@@ -159,6 +176,36 @@ const ServiceDetail = () => {
               ))}
             </ul>
           </div>
+
+          {/* Recommended Products Section */}
+          {serviceId && getRecommendedProducts(serviceId).length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-3xl font-serif font-bold mb-4">Produtos Recomendados</h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                Produtos selecionados para complementar este serviço e manter seus resultados perfeitos
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getRecommendedProducts(serviceId).map((product) => (
+                  <AmazonProductCard
+                    key={product.id}
+                    title={product.title}
+                    description={product.description}
+                    image={product.image}
+                    price={product.price}
+                    rating={product.rating}
+                    affiliateLink={getAffiliateLink(product.asin)}
+                    badge={product.badge}
+                    videoUrl={product.videoUrl}
+                  />
+                ))}
+              </div>
+              <div className="text-center mt-6">
+                <Button variant="outline" size="lg" asChild>
+                  <Link to="/produtos">Ver Todos os Produtos</Link>
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* CTA */}
           <div className="text-center">
