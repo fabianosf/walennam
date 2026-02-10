@@ -2,10 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ServiceCard from "@/components/ServiceCard";
 import TestimonialCard from "@/components/TestimonialCard";
-import AmazonProductCard from "@/components/AmazonProductCard";
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
-import { products as staticProducts, getAffiliateLink } from "@/data/products";
-import { useProducts as useProductsFirestore } from "@/hooks/useProducts";
 import walennaImage from "@/assets/walenna.jpg";
 import heroImage from "@/assets/hero-banner.jpg";
 import lashesImage from "@/assets/service-lashes.jpg";
@@ -13,8 +10,6 @@ import browsImage from "@/assets/service-brows.jpg";
 import progressiveImage from "@/assets/service-progressive.jpg";
 
 const Home = () => {
-  const { products: firestoreProducts } = useProductsFirestore();
-
   const services = [
     {
       title: "Alongamento de Cílios",
@@ -59,17 +54,6 @@ const Home = () => {
     "Resultados naturais e duradouros",
     "Agendamento online facilitado",
   ];
-
-  // Usa produtos reais do Firestore se disponíveis
-  const homeProducts = firestoreProducts.length > 0 ? firestoreProducts : staticProducts;
-
-  // Produtos em destaque para a home (prioriza produtos com badge, depois preenche até 4)
-  const featuredProductsWithBadge = homeProducts.filter((p) => p.badge).slice(0, 4);
-  const remainingSlots = 4 - featuredProductsWithBadge.length;
-  const featuredProducts = [
-    ...featuredProductsWithBadge,
-    ...homeProducts.filter((p) => !p.badge).slice(0, remainingSlots),
-  ].slice(0, 4);
 
   return (
     <div className="min-h-screen">
@@ -166,40 +150,6 @@ const Home = () => {
             {testimonials.map((testimonial) => (
               <TestimonialCard key={testimonial.name} {...testimonial} />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Recommended Products Section */}
-      <section className="py-20 bg-muted">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4">
-              Produtos Recomendados
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Selecionamos alguns itens do nosso catálogo de <Link to="/produtos" className="text-primary underline underline-offset-4">Produtos Recomendados</Link> para você manter os cuidados em casa com a mesma qualidade do estúdio.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-8">
-            {featuredProducts.map((product) => (
-              <AmazonProductCard
-                key={product.id}
-                title={product.title}
-                description={product.description}
-                image={product.image}
-                price={product.price}
-                rating={product.rating}
-                affiliateLink={getAffiliateLink(product.asin)}
-                badge={product.badge}
-                videoUrl={product.videoUrl}
-              />
-            ))}
-          </div>
-          <div className="text-center">
-            <Button variant="outline" size="lg" className="text-lg px-10 py-6" asChild>
-              <Link to="/produtos">Ver Todos os Produtos</Link>
-            </Button>
           </div>
         </div>
       </section>
